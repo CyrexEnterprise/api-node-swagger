@@ -1,0 +1,3 @@
+# ignore files or directions on eslint
+docs/
+coverage/

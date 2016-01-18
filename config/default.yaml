@@ -1,0 +1,67 @@
+server:
+  port: 8000
+
+logger:
+  path: ./
+  transports:
+    - type: File
+      options:
+        filename: default.log
+        level: info
+        json: false
+        maxsize: 5242880
+        maxFiles: 100
+        timestamp: true
+        prettyPrint: true
+        colorize: true
+        tailable: true
+    - type: Console
+      options:
+        level: info
+        json: false
+        timestamp: true
+        prettyPrint: true
+        colorize: true
+
+#   Template Loggly transport configuration
+#
+#   NOTE: Add token and subdomain to your local configuration file
+#
+#   - type: Loggly
+#     options:
+#       level: info
+#       subdomain: The subdomain of your Loggly account [required]
+#       inputToken: The input token [required]
+#       tags:
+#         - your tags here
+#         - another tag
+#       json: true
+#       stripColors: true
+  levels:
+    debug: 4
+    verbose: 3
+    info: 2
+    warn: 1
+    error: 0
+  colors:
+    debug: blue
+    verbose: white
+    info: green
+    warn: yellow
+    error: red
+
+swagger:
+  swaggerDefinition:
+    info: # API informations (required)
+      title: Hello World # Title (required)
+      version: 0.0.1 # Version (required)
+      description: A sample API # Description (optional)
+    host: localhost:8000 # Host (optional)
+    basePath: / # Base path (optional)
+  apis:
+    - ./src/hello.js
+  validator:
+    validateResponse: true
+  ui:
+    swaggerUi: /docs
+    apiDocs: /api-docs

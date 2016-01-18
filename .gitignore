@@ -1,0 +1,30 @@
+# Include your project-specific ignores in this file
+# Read about how to use .gitignore: https://help.github.com/articles/ignoring-files
+
+# Ignore all log files
+*.log*
+
+# Dependency directory
+node_modules
+
+# Documentation directory
+docs/
+coverage/
+
+# Build directory
+build/
+
+# Covers JetBrains IDEs
+*.iml
+
+## Directory-based project format:
+.idea/
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Ignore all local configurations
+config/local.*
+config/local-*.*
