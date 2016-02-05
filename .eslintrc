@@ -4,6 +4,7 @@
     "node": true
   },
   "rules": {
+    "new-cap": 0,
     "strict": 0,
     // not sure why airbnb turned this on. gross!
     "comma-dangle": 0,

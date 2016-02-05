@@ -13,7 +13,7 @@ module.exports = () => {
   // deferred middleware mounts
   app._deferred = [];
 
-  // defer a middle ware mount to the start of the application
+  // defer a middleware mount to the start of the application
   app.deferMount = (middleware, route) =>
      app._deferred.push([middleware, route]);
 

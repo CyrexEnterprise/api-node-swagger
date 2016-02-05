@@ -1,5 +1,4 @@
 'use strict';
-/** @module hello */
 const debug = require('debug')('app:api:hello');
 const util = require('util');
 

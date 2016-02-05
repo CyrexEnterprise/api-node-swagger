@@ -66,7 +66,6 @@ api.config(config.get('api')).then(resolved => {
       logger.promise.error('server stop on error', err).then(() => {
         debug('server stop');
       });
-      blm.close();
     });
   } else {
     if (logger) {
@@ -74,9 +73,9 @@ api.config(config.get('api')).then(resolved => {
         debug('stop');
         throw err;
       });
-    } else {
-      throw err;
     }
+
+    throw err;
   }
 });
 
