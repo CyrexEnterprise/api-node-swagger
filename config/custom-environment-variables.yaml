@@ -1,5 +1,11 @@
 # Custom environment variables override all configuration files,
 # including local.json. Only command line options take precedence over them.
 
-server:
-  port: PORT
+api:
+  server:
+    port: PORT
+  logger:
+    transports:
+      File:
+        options:
+          label: NODE_APP_INSTANCE

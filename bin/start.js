@@ -2,16 +2,21 @@
 'use strict';
 const debug = require('debug')('app:start');
 debug('run');
-const http = require('http');
 const _ = require('lodash');
-const config = require('config');
-const express = require('express');
-const app = express();
-const hello = require('../src/hello');
-const log = require('../src/log');
-const swagger = require('../src/swagger');
 
-debug('enviroment', _.pick(process.env,
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'development';
+}
+
+const config = require('config');
+
+const app = require('../src/express-server')();
+const api = require('../src/api')(app, 'api');
+
+let appServer;
+let logger;
+
+debug('environment', _.pick(process.env,
   'NODE_ENV',
   'NODE_DEBUG',
   'cwd',
@@ -27,51 +32,76 @@ debug('enviroment', _.pick(process.env,
   // custom enviroment variables
   'PORT'
 ));
-debug('configuration', config);
 
-const logger = log.createLogger(config.get('logger'));
-debug('logger created');
+api.config(config.get('api')).then(resolved => {
+  debug('config api');
+  logger = resolved.logger;
+  const swaggerSpec = resolved.swaggerSpec;
 
-app.use(logger.middleware());
+  debug('logger resolved', !!logger);
+  debug('swaggerSpec resolved', !!swaggerSpec);
 
-// TODO: express app configuration
+  // if you need to setup routes (dependency injection)
+  // you should do that here
 
-const swaggerSpec = swagger.fromJSDoc(config.get('swagger'));
+  // pipe then after routes ready
+  const pipes = api.pipe();
+  debug('api pipes', pipes);
 
-const swaggerMount = swagger.middleware(swaggerSpec).then(swaggerMiddleware => {
-  debug('swagger middlerware metadata mount');
-  app.use(swaggerMiddleware.swaggerMetadata());
-  debug('swagger middlerware validator mount');
-  app.use(swaggerMiddleware.swaggerValidator(config.get('swagger.validator')));
-  debug('swagger middlerware ui mount');
-  app.use(swaggerMiddleware.swaggerUi(config.get('swagger.ui')));
-});
+  // Mount router to mountPath
+  const mountPath = config.get('api.mountPath');
+  debug('mount api to ' + mountPath);
+  app.use(mountPath, api.router);
 
-swaggerMount.catch(err => logger.error(err));
-
-swaggerMount.then(() => {
-  // hello mounted to app
-  hello.mount(app);
-  debug('hello mounted');
-
-  app.use('/error', () => {
-    throw new Error('test error');
-  });
-
-  debug('logger.middlewareError');
-  app.use(logger.middlewareError());
-
-  /* eslint-disable no-unused-vars */
-  app.use((err, req, res, next) => {
-    /* eslint-enable no-unused-vars */
-    res.status(err.status || 500);
-    res.json({
-      message: err.message
+  // start server when ready
+  return app.start(config.get('server'));
+}).then(server => {
+  appServer = server;
+  logger.info('app start');
+  debug('start server on port: ' + config.get('server.port'));
+}).catch(err => {
+  debug('error', err);
+  if (appServer) {
+    appServer.close(() => {
+      logger.promise.error('server stop on error', err).then(() => {
+        debug('server stop');
+      });
+      blm.close();
     });
-  });
-
-  debug('create server');
-  http.createServer(app).listen(config.get('server.port'), () => {
-    logger.info('server started');
-  });
+  } else {
+    if (logger) {
+      return logger.promise.error('app error', err).then(() => {
+        debug('stop');
+        throw err;
+      });
+    } else {
+      throw err;
+    }
+  }
 });
+
+const gracefulShutdown = msg => {
+  if (msg === 'shutdown' || msg === 'SIGINT') {
+    if (msg === 'shutdown') {
+      process.removeListener('message', gracefulShutdown);
+    }
+    if (appServer) {
+      appServer.close(() => {
+        logger.promise.info('server stop on message: ' + msg).then(() => {
+          debug('server stop');
+        });
+      });
+    } else {
+      logger.promise.info('stop on message: ' + msg).then(() => {
+        debug('stop');
+      });
+    }
+  } else {
+    logger.warn('unexpected process msg', msg);
+  }
+};
+
+process.once('SIGINT', gracefulShutdown.bind(null, 'SIGINT'));
+process.on('message', gracefulShutdown);
+
+module.exports = app;

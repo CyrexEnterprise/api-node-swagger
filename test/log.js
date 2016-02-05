@@ -15,16 +15,15 @@ describe('log', () => {
     middleware: {
       requestWhitelist: ['ip']
     },
-    transports: [
-      {
+    transports: {
+      debug: {
         type: 'Console',
         options: {
-          name: 'debug',
           level: 'debug',
           silent: true
         }
       },
-      {
+      File: {
         type: 'File',
         options: {
           filename: 'test.log',
@@ -32,7 +31,7 @@ describe('log', () => {
           silent: true
         }
       }
-    ]
+    }
   });
 
   it('should throw error on missing transports', () => {
@@ -44,10 +43,12 @@ describe('log', () => {
   });
   it('should throw error on missing transport type', () => {
     expect(log.createLogger.bind(null, {
-      transports: [{
-        type: 'notThere',
-        options: {}
-      }]
+      transports: {
+        notThere: {
+          type: 'notThere',
+          options: {}
+        }
+      }
     })).to.throw('missing transport type: notThere');
   });
   describe('.promise[level] promised logging', function promised() {
@@ -74,16 +75,15 @@ describe('log', () => {
           debug: 1,
           verbose: 0
         },
-        transports: [
-          {
+        transports: {
+          other: {
             type: 'Console',
             options: {
-              name: 'other',
               level: 'debug',
               silent: true
             }
           }
-        ]
+        }
       });
       Object.keys(otherLogger.transports).should.have.length(1);
       otherLogger.remove(otherLogger.transports.other);

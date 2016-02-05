@@ -1,0 +1,26 @@
+api:
+  logger:
+    middleware:
+      requestWhitelist:
+        - body
+        - headers
+        - method
+        - ip
+        - ips
+        - query
+        - params
+        - path
+        - url
+        - baseUrl
+        - originalUrl
+        - fresh
+        - xhr
+        - subdomains
+        - protocol
+      responseWhitelist:
+        - statusCode
+        - body
+  swagger:
+    outputSpec: ./api-docs.json
+    validator:
+      validateResponse: true

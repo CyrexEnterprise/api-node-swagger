@@ -1,0 +1,29 @@
+{
+  "apps" : [{
+    // Express Starter Kit Cluster Application
+    "name"        : "app",
+    "script"      : "bin/start.js",
+    "merge_logs"  : true,
+    "error_file" : "./app-err.log",
+    "out_file"   : "./app-out.log",
+    "pid_file"   : "./app.pid",
+    "env": {
+      "NODE_ENV": "development"
+    },
+    "exec_mode"  : "cluster_mode",
+    "instances"  : 0,
+    "min_uptime" : 2000,
+    "max_restarts": 3,
+    "max_memory_restart": "1G",
+    "restart_delay": 100,
+    "env_production" : {
+      "NODE_ENV": "production"
+    },
+    "env_staging" : {
+      "NODE_ENV" : "staging"
+    },
+    "env_test" : {
+      "NODE_ENV" : "test"
+    }
+  }]
+}

@@ -1,0 +1,19 @@
+response:
+  badRequest:
+    description: Bad Request
+    schema:
+      $ref: "#/definitions/error"
+  notFound:
+    description: Resource Not Found
+    schema:
+      $ref: "#/definitions/error"
+  noContent:
+    description: "Successful, returns no content returned"
+  badContentType:
+    description: "Unacceptable Content-Type"
+    schema:
+      $ref: "#/definitions/error"
+  unexpected:
+    description: Unexpected Internal Server Error
+    schema:
+      $ref: "#/definitions/error"

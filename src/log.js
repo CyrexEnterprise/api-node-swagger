@@ -1,7 +1,7 @@
 'use strict';
 /** @module log - multi-transport async logging */
 const winston = require('winston');
-const debug = require('debug')('app:log');
+const debug = require('debug')('log-winston');
 const expressWinston = require('express-winston');
 const Promise = require('bluebird');
 const _ = require('lodash');
@@ -12,7 +12,9 @@ const path = require('path');
  *
  * @param {object} config - configuration of instance
  * @param {string} config.path - log path to folder relative to process.cwd
- * @param {TransportsConfiguration[]} config.transports - instance tranports configuration
+ * @param {Object.<string, TransportsConfiguration>} config.transports - instance
+ *  tranports configuration with key name of the transport and value the
+ *  configuration
  * @param {object} [config.colors] - colors with key level and value {string} color name
  * @param {object} [config.levels] - levels with key level and value {string} priority
  * @param {string} [config.level='info'] - defaut logger level
@@ -27,12 +29,12 @@ const path = require('path');
  * @param {string[]} [config.middleware.bodyWhitelist] - global request properties whitelist
  * @param {string[]} [config.middleware.bodyBlacklist] - global body properties Blacklist
  * @param {object} [config.errorHandler] - [errorHandler Options]{@link https://github.com/bithavoc/express-winston#options-1}
- * @return {Logger} Logger
+ * @return {object} Logger
  */
 const createLogger = config => {
   debug('create logger', config);
   const cfg = _.cloneDeep(config);
-  if (!cfg || !cfg.transports || !cfg.transports.length) {
+  if (!cfg || !cfg.transports || !Object.keys(cfg.transports).length) {
     throw new Error('missing configuration transports');
   }
   /**
@@ -44,29 +46,32 @@ const createLogger = config => {
    *  creation
    * @property {object} options - options used on transport creation
    */
-  cfg.transports = cfg.transports.map(transportConfig => {
-    // remove transport if not defined options or set to false
-    if (!transportConfig.options || !transportConfig.type) {
-      throw new Error('missing transport options or type');
-    }
-    debug('init transport type:', transportConfig.type);
-    const Transport = winston.transports[transportConfig.type];
-    if (!Transport) {
-      throw new Error('missing transport type: ' + transportConfig.type);
-    }
-    const options = transportConfig.options;
-    // set name equal to transport
-    options.name = options.name || cfg.type;
+  cfg.transports = Object.keys(cfg.transports)
+    .filter(name => !!cfg.transports[name])
+    .map(name => {
+      const transportConfig = cfg.transports[name];
+      // remove transport if not defined options or set to false
+      if (!transportConfig.options || !transportConfig.type) {
+        throw new Error('missing transport options or type');
+      }
+      debug('init transport type:', transportConfig.type);
+      const Transport = winston.transports[transportConfig.type];
+      if (!Transport) {
+        throw new Error('missing transport type: ' + transportConfig.type);
+      }
+      const options = transportConfig.options;
+      // set name
+      options.name = name;
 
-    // join absolute path to filename option to relative log path
-    if (options.filename) {
-      options.filename = path.resolve(process.cwd(), (
-        config.path || './log') + '/' + options.filename);
-    }
-    debug('new transport:', options);
-    // initialize and return transport
-    return new Transport(options);
-  });
+      // join absolute path to filename option to relative log path
+      if (options.filename) {
+        options.filename = path.resolve(process.cwd(), (
+          config.path || './log') + '/' + options.filename);
+      }
+      debug('new transport:', options);
+      // initialize and return transport
+      return new Transport(options);
+    });
 
   /** Logger - An extended instance of [winston.Logger]{@link https://github.com/winstonjs/winston}
    * @namespace
@@ -81,7 +86,7 @@ const createLogger = config => {
   const logger = new winston.Logger(cfg);
 
   logger.promise = Object.create(null);
-  // for each logger elve
+  // for each logger level
   Object.keys(logger.levels).forEach(level => {
     logger.promise[level] = function promiseLog() {
       const args = arguments;
@@ -124,7 +129,7 @@ const createLogger = config => {
   }
 
   /**
-   * @param {object|undefined} options - [middleware Options]{@link https://github.com/bithavoc/express-winston#options}
+   * @param {object} [options] - [middleware Options]{@link https://github.com/bithavoc/express-winston#options}
    * @returns {function} expressMiddleware
    */
   logger.middleware = options => {
@@ -134,7 +139,7 @@ const createLogger = config => {
     return expressWinston.logger(_.defaults(opts, config.middleware));
   };
   /**
-   * @param {object|undefined} options - [errorHandler Options]{@link https://github.com/bithavoc/express-winston#options-1}
+   * @param {object} [options] - [errorHandler Options]{@link https://github.com/bithavoc/express-winston#options-1}
    * @return {function} expressErrorHandler
    */
   logger.middlewareError = options => {

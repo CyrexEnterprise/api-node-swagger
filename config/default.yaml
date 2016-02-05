@@ -1,11 +1,9 @@
-server:
-  port: 8000
-
-logger:
+logger: &logger
   path: ./
-  transports:
-    - type: File
-      options:
+  transports: &logger-transports
+    File:
+      type: File
+      options: &logger-file-options
         filename: default.log
         level: info
         json: false
@@ -15,13 +13,35 @@ logger:
         prettyPrint: true
         colorize: true
         tailable: true
-    - type: Console
-      options:
+    Console:
+      type: Console
+      options: &logger-console-options
         level: info
         json: false
         timestamp: true
         prettyPrint: true
         colorize: true
+  middleware:
+    requestWhitelist:
+#      - body
+#      - headers
+#      - method
+      - ip
+#      - ips
+#      - query
+#      - params
+#      - path
+#      - url
+#      - baseUrl
+#      - originalUrl
+#      - fresh
+#      - xhr
+#      - subdomains
+#      - protocol
+    responseWhitelist:
+      - statusCode
+      - locals
+#      - body
 
 #   Template Loggly transport configuration
 #
@@ -50,18 +70,77 @@ logger:
     warn: yellow
     error: red
 
-swagger:
-  swaggerDefinition:
-    info: # API informations (required)
-      title: Hello World # Title (required)
-      version: 0.0.1 # Version (required)
-      description: A sample API # Description (optional)
-    host: localhost:8000 # Host (optional)
-    basePath: / # Base path (optional)
-  apis:
-    - ./src/hello.js
+base-api: &base-api
+  etag: false
+  cors:
+    origin: true
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+
+swagger: &swagger
   validator:
-    validateResponse: true
-  ui:
+    validateResponse: false
+  ui: &swagger-ui
     swaggerUi: /docs
     apiDocs: /api-docs
+  swaggerDefinition: &swaggerDefinition
+    tags:
+      -
+        name: meta
+        description: Operations related to the API
+      -
+        name: interact
+        description: Interact with the API
+    host: localhost:8000 # Host (optional)
+    schemes:
+      - http
+    consumes:
+      - application/json
+    produces:
+      - application/json
+
+server:
+  port: 8000
+
+api:
+  <<: *base-api
+  # use mountPath to version your endpoints /<version>
+  # the '/version' endpoint will output 'version'
+  mountPath: '/0'
+  logger:
+    <<: *logger
+    middleware:
+      requestWhitelist:
+        - ip
+      responseWhitelist:
+        - statusCode
+    transports:
+      <<: *logger-transports
+      File:
+        type: File
+        options:
+          <<: *logger-file-options
+          filename: api.log
+  routes: './src/api/routes'
+  swagger:
+    <<: *swagger
+    swaggerDefinition:
+      <<: *swaggerDefinition
+      info: # API informations (required)
+        version: '0.1.0' # Version (required)
+        title: Express Starter Kit API # Title (required)
+        description: Example express starter kit API # Description (optional)
+      basePath: /0 # basePath (optional)
+    apisDirs:
+      - ./src/api
+      - ./src/api/routes
+      - ./src/api/definitions
+  ui:
+    <<: *swagger-ui
+    swaggerUiPrefix: /0
+    apiDocsPrefix: /0

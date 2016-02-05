@@ -1,0 +1,21 @@
+definition:
+  error:
+    type: "object"
+    required:
+      - errors
+    properties:
+      errors:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: "string"
+              example: "ERROR_CODE"
+            message:
+              type: "string"
+              example: "Internal Server error"
