@@ -1,6 +1,5 @@
 {
   "apps" : [{
-    // Express Starter Kit Cluster Application
     "name"        : "app",
     "script"      : "bin/start.js",
     "merge_logs"  : true,
@@ -18,9 +17,6 @@
     "restart_delay": 100,
     "env_production" : {
       "NODE_ENV": "production"
-    },
-    "env_staging" : {
-      "NODE_ENV" : "staging"
     },
     "env_test" : {
       "NODE_ENV" : "test"

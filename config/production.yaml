@@ -3,3 +3,7 @@ api:
     middleware: false
     transports:
       Console: false
+  swagger:
+    outputSpec: ./api-docs.json
+    ui: false
+    serveDocs: /api-docs

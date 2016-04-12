@@ -1,54 +1,44 @@
 'use strict';
-const debug = require('debug')('api:main');
+const debug = require('debug')('app:api');
 debug('run');
 
 const path = require('path');
 const fs = require('fs');
 
 const Promise = require('bluebird');
-const cors = require('cors');
 const _ = require('lodash');
 const express = require('express');
 const expressServer = require('../express-server');
 const log = require('../log');
 const swagger = require('../swagger');
 
-// TODO: enum error codes in specification
+const resolvePath = relative => path.resolve(process.cwd(), relative);
 
-/* eslint-disable no-unused-vars */
-const errorHandler = (err, req, res, next) => {
-  /* eslint-enable no-unused-vars */
-  let errors = [];
-  debug('error', err);
-  debug('error stack', err.stack);
-  if (err.failedValidation && err.results && err.results.errors) {
-    res.status(400);
-    errors = errors.concat(err.results.errors)
-      .map(e => ({code: e.code, message: e.message}));
-  } else {
-    if (!res.statusCode || res.statusCode < 400) {
-      res.status(err.status || 500);
-    }
+const loadRouteDir = (store, fileDir) => fs.readdirSync(fileDir)
+  .map(path.parse)
+  .filter(file =>
+  file.name &&
+  file.name.indexOf('.') === -1 &&
+  file.name !== 'index' &&
+  file.ext === '.js')
+  .forEach(file => store[file.name] = require(path.join(fileDir, file.base)));
 
-    if (!err.code) {
-      if (err.message.indexOf('Invalid content type') === 0) {
-        err.code = 'INVALID_CONTENT_TYPE';
-        res.status(406);
-      } else {
-        err.code = 'UNEXPECTED_ERROR';
-      }
-    }
-
-    errors.push({
-      message: err.message,
-      code: err.code
-    });
+const loadDocsDirs = (docsDirs, extensions) => {
+  if (!docsDirs) {
+    return [];
   }
-  debug('errors', errors);
-  res.json({
-    errors
-  });
+  const exts = extensions || ['.js', '.jsdoc', '.yaml', '.yml'];
+  const dirs = docsDirs.map(resolvePath).map(fs.readdirSync)
+    .map((filenames, i) => filenames.map(path.parse)
+      .filter(
+        file => file.name &&
+        file.name.indexOf('.') === -1 &&
+        (exts.indexOf(file.ext) !== -1)
+      ).map(file => path.join(docsDirs[i], file.base)));
+  return _.flatten(dirs);
 };
+
+// TODO: enum error codes in specification
 
 module.exports = (app, namespace) => {
   let api = app;
@@ -65,9 +55,7 @@ module.exports = (app, namespace) => {
     server = app;
     app[namespace] = Object.create(null);
     api = app[namespace];
-    /* eslint-disable new-cap */
     route = express.Router();
-    /* eslint-enable new-cap */
     api.router = route;
   } else if (!app && namespace) {
     throw new Error('invalid arguments');
@@ -81,17 +69,13 @@ module.exports = (app, namespace) => {
     let swaggerMount;
     let swaggerSpec;
 
-    if (typeof config.etag !== 'undefined') {
-      server.set('etag', config.etag);
-    }
-
-    if (config.cors) {
-      route.use(cors(_.cloneDeep(config.cors)));
-    }
-
-    if (config.logger) {
-      debug('create logger');
-      logger = log.createLogger(config.logger);
+    if (config.logger || (config.logger && config.logging)) {
+      if (config.logging) {
+        logger = config.logging;
+      } else {
+        debug('create logger');
+        logger = log.createLogger(config.logger);
+      }
 
       if (config.logger.middleware) {
         debug('logger middleware mount');
@@ -106,34 +90,33 @@ module.exports = (app, namespace) => {
     }
 
     if (config.swagger) {
-      if (config.swagger.apisDirs) {
-        const exts = config.swagger.exts || ['.js', '.jsdoc', '.yaml', '.yml'];
-        const dirs = config.swagger.apisDirs
-          .map(dir => path.resolve(process.cwd(), dir))
-          .map(fs.readdirSync)
-          .map((filenames, i) => filenames.map(path.parse)
-            .filter(
-              file => file.name &&
-              file.name.indexOf('.') === -1 &&
-              (exts.indexOf(file.ext) !== -1)
-            ).map(file => path.join(config.swagger.apisDirs[i], file.base)));
-        config.swagger.apis = _.flatten(dirs);
-        debug('apis', config.swagger.apis);
+      config.swagger.apis = loadDocsDirs(config.swagger.docsDirs,
+        config.swagger.exts);
+
+      if (config.swagger.docs) {
+        config.swagger.apis = config.swagger.apis
+          .concat(config.swagger.docs.map(resolvePath));
       }
+
+      debug('apis', config.swagger.apis);
+
       swaggerSpec = swagger.fromJSDoc(config.swagger);
-      debug('swaggerSpec', swaggerSpec);
+
       if (config.swagger.outputSpec) {
         fs.writeFileSync(config.swagger.outputSpec,
-          JSON.stringify(swaggerSpec, null, 2),
-          'utf-8');
+          JSON.stringify(swaggerSpec, null, 2), 'utf-8');
       }
+
+      if (config.swagger.serveDocs) {
+        route.get(config.swagger.serveDocs, (req, res) => {
+          res.json(swaggerSpec);
+        });
+      }
+
       swaggerMount = swagger.middleware(swaggerSpec)
         .tap(middleware => {
           debug('swagger middleware metadata mount');
           server.use(middleware.swaggerMetadata());
-
-          // TODO: config.security (config to fetch handlers) to initialize
-          //  middleware.swaggerSecurity()
 
           if (config.swagger.validator) {
             debug('swagger middleware validator mount');
@@ -147,39 +130,16 @@ module.exports = (app, namespace) => {
         });
     }
 
-    // catch unhandled requests 404
-    server.deferMount((req, res, next) => {
-      const err = new Error('Not found');
-      err.status = 404;
-      err.code = 'NOT_FOUND';
-      next(err);
-    }, namespace ? route : undefined);
-
-    debug('handleError mount deferred');
-    server.deferMount(errorHandler);
-
     // Routes loading
     if (config.routes) {
-      const filePath = path.resolve(process.cwd(), config.routes);
-      fs.readdirSync(filePath)
-        .map(path.parse)
-        .filter(file =>
-        file.name &&
-        file.name.indexOf('.') === -1 &&
-        file.name !== 'index' &&
-        file.ext === '.js')
-        .forEach(file => {
-          debug('route', file.name);
-          api.routes[file.name] = require(path.join(filePath, file.base));
-        });
+      config.routes.map(resolvePath).forEach(filePath =>
+        api.routes[path.parse(filePath).name] = require(filePath));
     }
 
-    const version = config.mountPath.replace('/', '');
-
-    debug('api version: ', version);
-    server.use('/version', (req, res) => {
-      res.send(version);
-    });
+    if (config.routesDirs) {
+      config.routesDirs.map(resolvePath)
+        .forEach(dir => loadRouteDir(api.routes, dir));
+    }
 
     return Promise.resolve(swaggerMount).then(swaggerMiddleware => ({
       logger,
@@ -189,19 +149,12 @@ module.exports = (app, namespace) => {
   };
 
   api.pipe = routes => {
-    let pipes = Object.keys(api.routes);
+    let pipes;
 
-    if (Array.isArray(routes)) {
-      pipes = pipes.filter(routes);
-    } else if (typeof routes === 'string') {
-      pipes = pipes.filter([routes]);
-    }
-
-    // push '*' endpoint to the end of the pipes
-    const allIndex = _.findIndex(pipes,
-      pipe => api.routes[pipe].endpoint === '*');
-    if (allIndex >= 0 && allIndex !== pipes.length - 1) {
-      pipes.push(_.pullAt(pipes, allIndex)[0]);
+    if (!routes) {
+      pipes = Object.keys(api.routes);
+    } else {
+      pipes = routes;
     }
 
     _.forEach(pipes, pipe => route.use((api.routes[pipe].endpoint ?

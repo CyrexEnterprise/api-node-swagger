@@ -2,18 +2,62 @@ response:
   badRequest:
     description: Bad Request
     schema:
-      $ref: "#/definitions/error"
+      type: "object"
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: "string"
+          example: "NOT_FOUND"
+        message:
+          type: "string"
+          example: "Bad request"
   notFound:
     description: Resource Not Found
     schema:
-      $ref: "#/definitions/error"
+      type: "object"
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: "string"
+          example: "NOT_FOUND"
+        message:
+          type: "string"
+          example: "Not found"
   noContent:
     description: "Successful, returns no content returned"
   badContentType:
     description: "Unacceptable Content-Type"
     schema:
-      $ref: "#/definitions/error"
+      type: "object"
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: "string"
+          example: "INVALID_CONTENT_TYPE"
+        message:
+          type: "string"
+          example: "Invalid content type"
   unexpected:
     description: Unexpected Internal Server Error
     schema:
-      $ref: "#/definitions/error"
+      type: "object"
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: "string"
+          example: "UNEXPECTED_ERROR"
+        message:
+          type: "string"
+          example: "Internal Server error"

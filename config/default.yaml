@@ -70,18 +70,6 @@ logger: &logger
     warn: yellow
     error: red
 
-base-api: &base-api
-  etag: false
-  cors:
-    origin: true
-    methods:
-      - GET
-      - POST
-      - PUT
-      - PATCH
-      - DELETE
-      - OPTIONS
-
 swagger: &swagger
   validator:
     validateResponse: false
@@ -104,13 +92,10 @@ swagger: &swagger
     produces:
       - application/json
 
-server:
-  port: 8000
+version: 0
 
 api:
-  <<: *base-api
   # use mountPath to version your endpoints /<version>
-  # the '/version' endpoint will output 'version'
   mountPath: '/0'
   logger:
     <<: *logger
@@ -126,21 +111,37 @@ api:
         options:
           <<: *logger-file-options
           filename: api.log
-  routes: './src/api/routes'
+  routesDirs:
+    - './src/api/routes'
   swagger:
     <<: *swagger
+    swagger-ui:
+      <<: *swagger-ui
     swaggerDefinition:
       <<: *swaggerDefinition
       info: # API informations (required)
-        version: '0.1.0' # Version (required)
+        version: '0.2.0' # Version (required)
         title: Express Starter Kit API # Title (required)
         description: Example express starter kit API # Description (optional)
       basePath: /0 # basePath (optional)
-    apisDirs:
+    docsDirs:
       - ./src/api
       - ./src/api/routes
-      - ./src/api/definitions
-  ui:
-    <<: *swagger-ui
-    swaggerUiPrefix: /0
-    apiDocsPrefix: /0
+
+server:
+  port: 8000
+  cors:
+    origin: true
+    maxAge: 172800
+    preflightContinue: true
+    allowedHeaders:
+      - Accept
+      - Content-Type
+      - Authorization
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS

@@ -1,4 +1,0 @@
-api:
-  logger:
-    transports:
-      Console: false

@@ -23,7 +23,7 @@ specific routers
 
 ### Requirements
 
-- node: >4.2
+- node: >5.10
 - npm: >3.3
 
 #### Install dependencies
