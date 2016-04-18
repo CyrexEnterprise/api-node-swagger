@@ -1,0 +1,11 @@
+securityDefinition:
+  api_key:
+    type: apiKey
+    name: Authorization
+    in: header
+  oauth2:
+    type: oauth2
+    scopes:
+      users: Grants read/write access to profile info
+      accounts: Grants read/write access to accounts
+    flow: implicit

@@ -1,6 +1,6 @@
-# Express Starter Kit
+# api-node-swagger
 
-Boilerplate for express web applications.
+Boilerplate for API layer - Node.JS - Swagger.
 
 ## Features
 

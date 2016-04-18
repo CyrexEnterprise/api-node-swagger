@@ -1,3 +1,11 @@
+oauth2:
+  logger:
+    middleware: false
+
+caller:
+  queue:
+    name: rpc
+
 api:
   logger:
     middleware: false
@@ -7,3 +15,11 @@ api:
     outputSpec: ./api-docs.json
     ui: false
     serveDocs: /api-docs
+
+superadmin:
+  logger:
+    middleware: false
+  swagger:
+    outputSpec: ./sa-api-docs.json
+    ui: false
+    serveDocs: false

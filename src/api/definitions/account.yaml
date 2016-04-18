@@ -1,0 +1,27 @@
+definition:
+  account_post:
+    type: "object"
+    required:
+      - name
+    properties:
+      name: &name
+        type: "string"
+        example: "AccountName"
+  account:
+    type: object
+    additionalProperties: false
+    required:
+      - id
+      - name
+    properties: &account-props
+      id: &id
+        type: "integer"
+        format: "int32"
+        example: 42
+      name:
+        <<: *name
+  account_patch:
+    type: "object"
+    properties:
+      name:
+        <<: *name

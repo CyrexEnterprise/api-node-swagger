@@ -2,62 +2,86 @@ response:
   badRequest:
     description: Bad Request
     schema:
-      type: "object"
+      type: object
       additionalProperties: false
-      required:
-        - code
-        - message
       properties:
-        code:
-          type: "string"
-          example: "NOT_FOUND"
-        message:
-          type: "string"
-          example: "Bad request"
+        errors:
+          type: array
+          items:
+            type: "object"
+            additionalProperties: false
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: "string"
+                example: "NOT_FOUND"
+              message:
+                type: "string"
+                example: "Bad request"
   notFound:
     description: Resource Not Found
     schema:
-      type: "object"
+      type: object
       additionalProperties: false
-      required:
-        - code
-        - message
       properties:
-        code:
-          type: "string"
-          example: "NOT_FOUND"
-        message:
-          type: "string"
-          example: "Not found"
+        errors:
+          type: array
+          items:
+            type: "object"
+            additionalProperties: false
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: "string"
+                example: "NOT_FOUND"
+              message:
+                type: "string"
+                example: "Not found"
   noContent:
     description: "Successful, returns no content returned"
   badContentType:
     description: "Unacceptable Content-Type"
     schema:
-      type: "object"
+      type: object
       additionalProperties: false
-      required:
-        - code
-        - message
       properties:
-        code:
-          type: "string"
-          example: "INVALID_CONTENT_TYPE"
-        message:
-          type: "string"
-          example: "Invalid content type"
+        errors:
+          type: array
+          items:
+            type: "object"
+            additionalProperties: false
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: "string"
+                example: "INVALID_CONTENT_TYPE"
+              message:
+                type: "string"
+                example: "Invalid content type"
   unexpected:
     description: Unexpected Internal Server Error
     schema:
-      type: "object"
+      type: object
       additionalProperties: false
-      required:
-        - code
-        - message
       properties:
-        code:
-          type: "string"
-          example: "UNEXPECTED_ERROR"
-        message:
-          type: "string"
-          example: "Internal Server error"
+        errors:
+          type: array
+          items:
+            type: "object"
+            additionalProperties: false
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: "string"
+                example: "UNEXPECTED_ERROR"
+              message:
+                type: "string"
+                example: "Internal Server error"

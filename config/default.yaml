@@ -79,6 +79,12 @@ swagger: &swagger
   swaggerDefinition: &swaggerDefinition
     tags:
       -
+        name: accounts
+        description: Operations about Accounts
+      -
+        name: users
+        description: Operations about Users
+      -
         name: meta
         description: Operations related to the API
       -
@@ -91,10 +97,30 @@ swagger: &swagger
       - application/json
     produces:
       - application/json
+  oauth2:
+    authorizationUrl: http://localhost:8000/oauth2/login
 
 version: 0
 
-api:
+oauth2:
+  mountPath: /oauth2
+  authorizationUrl: http://localhost:8000/oauth2/login
+  routes:
+    - ./src/oauth2
+  logger:
+    middleware:
+      requestWhitelist:
+        - ip
+      responseWhitelist:
+        - statusCode
+
+caller:
+  connection:
+    url: amqp://localhost
+  queue:
+    name: 'rpc_dev'
+
+api: &api
   # use mountPath to version your endpoints /<version>
   mountPath: '/0'
   logger:
@@ -120,16 +146,54 @@ api:
     swaggerDefinition:
       <<: *swaggerDefinition
       info: # API informations (required)
-        version: '0.2.0' # Version (required)
-        title: Express Starter Kit API # Title (required)
-        description: Example express starter kit API # Description (optional)
+        version: '0.1.0' # Version (required)
+        title: API-NODE-SWAGGER # Title (required)
+        description: Example API layer # Description (optional)
       basePath: /0 # basePath (optional)
     docsDirs:
       - ./src/api
+      - ./src/api/definitions
       - ./src/api/routes
+
+superadmin:
+  <<: *api
+  logger:
+    middleware:
+      requestWhitelist:
+        - ip
+      responseWhitelist:
+        - statusCode
+  routes:
+    - ./src/api/routes/swagger
+  swagger:
+    <<: *swagger
+    ui:
+      swaggerUi: /superadmin-docs
+      apiDocs: /superadmin-api-docs
+    swaggerDefinition:
+      <<: *swaggerDefinition
+      basePath: /0 # basePath (optional)
+      info:
+        # API information (required)
+        version: '0.1.0' # Version (required)
+        title: API-NODE-SWAGGER Superadmin # Title (required)
+        description: Example Superadmin API layer # Description (optional)
+    docsDirs:
+      - ./src/api
+      - ./src/api/definitions
+      - ./src/api/routes/superadmin
 
 server:
   port: 8000
+  strictToken: false
+  views:
+    path: './src/views'
+    extname: '.hbs'
+    defaultLayout: 'main'
+    layoutsDir: './src/views/layouts'
+    partialsDir:
+      dir: './src/views/partials'
+      namespace: 'partials'
   cors:
     origin: true
     maxAge: 172800

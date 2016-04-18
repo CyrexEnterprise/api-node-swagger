@@ -16,6 +16,13 @@ errors.notFound = () => {
   return err;
 };
 
+errors.unauthorized = () => {
+  const err = new Error('Token invalid or missing');
+  err.code = 'UNAUTHORIZED';
+  err.status = 401;
+  return err;
+};
+
 /* eslint-disable no-unused-vars */
 errors.handler = logger => (err, req, res, next) => {
   /* eslint-enable no-unused-vars */

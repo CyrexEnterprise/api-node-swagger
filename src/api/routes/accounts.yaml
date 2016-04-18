@@ -1,0 +1,170 @@
+/accounts:
+  get:
+    tags:
+      - accounts
+    summary: "Find accounts associated with the loggedin user"
+    description: "Returns all the user associated accounts"
+    operationId: getUserAccounts
+    security:
+      - api_key: []
+      - oauth2:
+        - accounts
+    responses:
+      200:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/definitions/account"
+      default:
+        $ref: "#/responses/unexpected"
+
+/accounts/{id}:
+  patch:
+    tags:
+      - accounts
+    summary: "Update an account"
+    operationId: patchAccount
+    security:
+      - api_key: []
+      - oauth2:
+        - accounts
+    parameters:
+      -
+        $ref: "#/parameters/id"
+      -
+        in: "body"
+        name: "body"
+        description: "Update specific fields of resource"
+        required: true
+        schema:
+          $ref: "#/definitions/account_patch"
+    responses:
+      200:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/definitions/account"
+      404:
+        $ref: "#/responses/notFound"
+      default:
+        $ref: "#/responses/unexpected"
+  delete:
+    tags:
+      - accounts
+    summary: "Deletes a account"
+    operationId: deleteAccount
+    security:
+      - api_key: []
+      - oauth2:
+        - accounts
+    parameters:
+      -
+        $ref: "#/parameters/id"
+    responses:
+      204:
+        $ref: "#/responses/noContent"
+      default:
+        $ref: "#/responses/unexpected"
+
+/accounts/{account_id}/users:
+  post:
+    tags:
+      - accounts
+    summary: "Invite an user and/or associate it with the account"
+    operationId: postAccountUser
+    security:
+      - api_key: []
+      - oauth2:
+        - accounts
+    description: >
+                   User creation by invitation and associate with a specific
+                   account. If the user already exists (uniquely identified by
+                   email) it will only associate.
+    parameters:
+      -
+        $ref: "#/parameters/account_id"
+      -
+        in: "body"
+        name: "body"
+        description: "Invite an user"
+        required: true
+        schema:
+          $ref: "#/definitions/user_invitation"
+    responses:
+      201:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/definitions/user"
+      204:
+        description: Successful user association (user already exists)
+      default:
+        $ref: "#/responses/unexpected"
+  get:
+    tags:
+      - accounts
+    summary: "Find users associated with the account"
+    description: "Returns all the account associated users"
+    operationId: getAccountUsers
+    security:
+      - api_key: []
+      - oauth2:
+        - accounts
+    parameters:
+      -
+        $ref: "#/parameters/account_id"
+      - name: name
+        in: query
+        type: string
+        description: Search account users by first or last name
+      -
+        $ref: "#/parameters/limit"
+    responses:
+      200:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/definitions/user"
+      default:
+        $ref: "#/responses/unexpected"
+
+/accounts/{account_id}/users/{user_id}:
+  delete:
+    tags:
+      - accounts
+    summary: "Remove an account user association"
+    operationId: deleteAccountUser
+    security:
+      - api_key: []
+      - oauth2:
+        - accounts
+    parameters:
+      -
+        $ref: "#/parameters/account_id"
+      -
+        $ref: "#/parameters/user_id"
+    responses:
+      204:
+        $ref: "#/responses/noContent"
+      default:
+        $ref: "#/responses/unexpected"

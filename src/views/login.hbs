@@ -1,0 +1,34 @@
+<div class="outer">
+  <div class="middle">
+    <article class="panel panel-auth">
+      <div class="panel-heading panel-header">
+        <h3 class="page-header auth-title">Login</h3>
+      </div>
+      <div class="separator"></div>
+      <div class="panel-body panel-content">
+        {{#if errors }}
+          {{> partials/error }}
+        {{else}}
+          <form action="{{> partials/href }}" method="post" accept-charset="UTF-8">
+            <div class="form-group vt-input">
+              <label for="control-label">Email</label>
+              <input title="Enter a valid email address" class="form-control" id="login-email" type="email" placeholder="Enter a valid email address" name="email" required pattern="[^@]+@[^@]+\.[a-zA-Z]{2,}" autofocus="autofocus"  />
+            </div>
+            <br>
+            <div class="form-group input">
+              <label for="control-label">Password</label>
+              <input title="Password must contain 4 characters at least a number and a letter" class="form-control is-focused" id="login-password" type="password" name="password" required pattern="(?=.*\d)(?=.*[a-zA-Z]).{4,}" />
+            </div>
+            <div class="form-actions">
+              <input class="btn submit" type="submit" value="Submit" />
+              <a href="{{> partials/href url='forgot'}}" class="link action-link forgot">Forgot password?</a>
+            </div>
+          </form>
+        {{/if}}
+      </div>
+    </article>
+  </div>
+</div>
+<script type="text/javascript" >
+    document.getElementById("login-email").focus();
+</script>

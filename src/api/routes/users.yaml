@@ -1,0 +1,76 @@
+/users/{id}:
+  patch:
+    tags:
+      - users
+    summary: "Update an user"
+    operationId: patchUser
+    security:
+      - api_key: []
+      - oauth2:
+        - users
+    parameters:
+      -
+        $ref: "#/parameters/id"
+      -
+        in: "body"
+        name: "body"
+        description: "Update specific fields of resource"
+        required: true
+        schema:
+          $ref: "#/definitions/user_patch"
+    responses:
+      200:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/definitions/user"
+      404:
+        $ref: "#/responses/notFound"
+      default:
+        $ref: "#/responses/unexpected"
+  delete:
+    tags:
+      - users
+    summary: "Deletes a user"
+    operationId: deleteUser
+    security:
+      - api_key: []
+      - oauth2:
+        - users
+    parameters:
+      -
+        $ref: "#/parameters/id"
+    responses:
+      204:
+        $ref: "#/responses/noContent"
+      404:
+        $ref: "#/responses/notFound"
+      default:
+        $ref: "#/responses/unexpected"
+/me:
+  get:
+    tags:
+      - users
+    summary: Find yourself
+    operationId: me
+    security:
+      - api_key: []
+      - oauth2:
+        - users
+    description: Returns current logged in user information and accounts
+    responses:
+      200:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/definitions/user_me"
+      default:
+        $ref: "#/responses/unexpected"

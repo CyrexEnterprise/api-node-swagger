@@ -30,4 +30,4 @@ config/local.*
 config/local-*.*
 
 # ignore auto generated api-docs.json
-api-docs.json
+*api-docs.json

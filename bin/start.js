@@ -7,6 +7,7 @@ if (!process.env.NODE_ENV) {
 }
 debug('run');
 
+const path = require('path');
 const _ = require('lodash');
 const config = require('config');
 const Promise = require('bluebird');
@@ -15,10 +16,17 @@ const cors = require('cors');
 const app = require('../src/express-server')();
 const apiBuilder = require('../src/api');
 const api = apiBuilder(app, 'api');
-const errors = require('../src/api/errors');
+const superadmin = apiBuilder(app, 'sa');
+const oauth2 = apiBuilder(app, 'oauth2');
+const tokenCheck = require('../src/tokenCheck');
+const errors = require('../src/errors');
+const amqp = require('mq-node-amqp');
+
+const exphbs = require('express-handlebars');
 
 let appServer;
 let logger;
+let caller;
 
 debug('environment', _.pick(process.env,
   'NODE_ENV',
@@ -41,6 +49,19 @@ if (config.get('server.cors')) {
   app.use(cors(_.cloneDeep(config.server.cors)));
 }
 
+const hbs = exphbs.create(config.get('server.views'));
+
+app.engine(config.get('server.views.extname'), hbs.engine);
+// set default engine
+app.set('view engine', config.get('server.views.extname'));
+
+if (config.has('server.trustProxy')) {
+  app.set('trust proxy', config.get('server.trustProxy'));
+}
+app.set('views', path.resolve(process.cwd(),
+  config.get('server.views.path')));
+
+
 api.config(config.get('api')).then(resolved => {
   debug('config api');
   logger = resolved.logger;
@@ -56,8 +77,21 @@ api.config(config.get('api')).then(resolved => {
     res.json(version);
   });
 
+  app.use(tokenCheck(config.get('server.strictToken')));
+
+  app.deferMount(errors.catchUnhandled());
+  app.deferMount(errors.handler(logger));
+
+  return amqp.createCaller(config.get('caller'));
+}).then(amqpCaller => {
+  caller = amqpCaller;
   // if you need to setup routes (dependency injection)
   // you should do that here
+
+  api.routes.swagger.setup({
+    logger,
+    caller
+  });
 
   // pipe then after routes ready
   const pipes = api.pipe();
@@ -68,8 +102,42 @@ api.config(config.get('api')).then(resolved => {
   debug('mount api to ' + mountPath);
   app.use(mountPath, api.router);
 
-  app.deferMount(errors.catchUnhandled());
-  app.deferMount(errors.handler(logger));
+  const cfgSuperadmin = config.get('superadmin');
+  if (cfgSuperadmin.logger && !cfgSuperadmin.logger.transports) {
+    cfgSuperadmin.logging = logger;
+  }
+  return superadmin.config(cfgSuperadmin);
+}).then(() => {
+  debug('config superadmin');
+
+  const saPipes = superadmin.pipe();
+  debug('sa pipes', saPipes);
+
+  const mountPath = config.get('superadmin.mountPath');
+  debug('mount superadmin to ' + mountPath);
+  app.use(mountPath, superadmin.router);
+  const cfgOauth2 = config.get('oauth2');
+  if (cfgOauth2.logger && !cfgOauth2.logger.transports) {
+    cfgOauth2.logging = logger;
+  }
+  return oauth2.config(cfgOauth2);
+}).then(resolved => {
+  debug('config oauth2');
+
+  oauth2.routes.oauth2.setup({
+    logger: resolved.logger,
+    caller,
+    authorizationUrl: config.get('oauth2.authorizationUrl'),
+    mountPath: config.get('oauth2.mountPath')
+  });
+
+  const oauth2Pipes = oauth2.pipe();
+  debug('oauth2 pipes', oauth2Pipes);
+
+  const mountPath = config.get('oauth2.mountPath');
+  debug('mount oauth2 to ' + mountPath);
+
+  app.use(mountPath, oauth2.router);
 
   // start server when ready
   return app.start(config.get('server'));
@@ -89,6 +157,7 @@ api.config(config.get('api')).then(resolved => {
         return logger.promise.warn('server', error);
       }
     })
+    .then(() => caller ? caller.close() : null)
     .then(() => logger ?
       logger.promise.error('servers stopped on error: ' + err) : null)
     .then(() => debug('server stop'))
@@ -114,7 +183,9 @@ const gracefulShutdown = msg => {
         if (!~err.message.indexOf('Not running')) {
           return logger.promise.warn('server', err);
         }
-      }).then(() => logger.promise.info('servers stopped on message: ' + msg))
+      })
+      .then(() => caller ? caller.close() : null)
+      .then(() => logger.promise.info('servers stopped on message: ' + msg))
       .then(() => debug('server stop'))
       .catch(err => logger.promise.error('shutdown error', err)
         .then(() => {

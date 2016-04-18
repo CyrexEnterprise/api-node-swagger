@@ -1,0 +1,35 @@
+<div class="outer">
+  <div class="middle">
+    <article class="panel panel-auth">
+      <div class="panel-heading panel-header">
+        <h3 class="page-header auth-title">Reset Password</h3>
+      </div>
+      <div class="separator"></div>
+      <div class="panel-body panel-content">
+        {{#if errors }}
+          {{> partials/error }}
+        {{else}}
+          {{#if data.resetPasswordSent}}
+            <div class="resetpassword-sent">
+              <p class="resetpassword-msg"><br><span>Reset password email sent.</span><br /><br /><span>Check your inbox.</span>
+              </p>
+            </div>
+            <br />
+            <br />
+          {{else}}
+            <form action="{{> partials/href }}" method="post" accept-charset="UTF-8">
+              <div class="form-group input">
+                <label for="control-label">Email</label>
+                <input title="Enter a valid email address" class="form-control" id="login-email" type="email" placeholder="Enter a valid email address" name="email" required pattern="[^@]+@[^@]+\.[a-zA-Z]{2,}" />
+              </div>
+              <br>
+              <div class="form-actions">
+                <input class="btn submit" type="submit" value="Submit" />
+              </div>
+            </form>
+          {{/if}}
+        {{/if}}
+      </div>
+    </article>
+  </div>
+</div>

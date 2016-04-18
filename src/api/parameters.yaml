@@ -1,0 +1,28 @@
+parameter:
+  id: &id
+    name: id
+    in: path
+    description: ID of the resource
+    required: true
+    type: integer
+    format: int32
+  user_id:
+    <<: *id
+    name: user_id
+    description: User ID
+  account_id:
+    <<: *id
+    name: account_id
+    description: Account ID
+  limit:
+    name: limit
+    in: query
+    type: integer
+    format: int32
+    description: limit the number of upcoming results
+  offset:
+    name: offset
+    in: query
+    type: integer
+    format: int32
+    description: offset the upcoming results

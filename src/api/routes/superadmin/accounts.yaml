@@ -1,0 +1,61 @@
+/accounts:
+  post:
+    tags:
+      - accounts
+    summary: "Create an account"
+    operationId: postAccount
+    security:
+      - api_key: []
+      - oauth2:
+        - accounts
+    description: Account creation
+    parameters:
+      -
+        in: "body"
+        name: "body"
+        description: "Create account"
+        required: true
+        schema:
+          $ref: "#/definitions/account_post"
+    responses:
+      201: &account-response
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/definitions/account"
+      400:
+        $ref: "#/responses/badRequest"
+      default:
+        $ref: "#/responses/unexpected"
+/accounts/{id}:
+  get:
+    tags:
+      - accounts
+    summary: "Find account"
+    operationId: getAccount
+    security:
+      - api_key: []
+      - oauth2:
+        - accounts
+    description: "Returns a single account"
+    parameters:
+      -
+        $ref: "#/parameters/id"
+    responses:
+      200:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/definitions/account"
+      404:
+        $ref: "#/responses/notFound"
+      default:
+        $ref: "#/responses/unexpected"

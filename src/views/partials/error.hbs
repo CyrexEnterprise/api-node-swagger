@@ -1,0 +1,10 @@
+<div class="error">
+  <p class="error-msg"><br><span class="alert">Error:</span>
+    {{#each errors }}
+    <br><span>{{ message }}<span>
+    {{/each}}
+  </p>
+  <div class="error-btn">
+    <input type="submit" class='btn submit' onclick="history.back();" value="Go back" />
+  <div>
+</div>

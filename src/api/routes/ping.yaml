@@ -1,0 +1,11 @@
+/ping:
+  get:
+    tags:
+      - meta
+    description: Returns 'pong' to the caller
+    operationId: ping
+    responses:
+      204:
+        $ref: "#/responses/noContent"
+      default:
+        $ref: "#/responses/unexpected"

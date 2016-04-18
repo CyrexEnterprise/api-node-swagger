@@ -102,6 +102,14 @@ module.exports = (app, namespace) => {
 
       swaggerSpec = swagger.fromJSDoc(config.swagger);
 
+      if (config.swagger.oauth2) {
+        const oauth2 = swaggerSpec.securityDefinitions.oauth2;
+        oauth2.authorizationUrl = config.get('swagger.oauth2.authorizationUrl');
+        if (config.has('swagger.oauth2.tokenUrl')) {
+          oauth2.tokenUrl = config.get('swagger.oauth2.tokenUrl');
+        }
+      }
+
       if (config.swagger.outputSpec) {
         fs.writeFileSync(config.swagger.outputSpec,
           JSON.stringify(swaggerSpec, null, 2), 'utf-8');
@@ -129,6 +137,8 @@ module.exports = (app, namespace) => {
           }
         });
     }
+
+    route.options('*', (req, res) => res.status(204).send());
 
     // Routes loading
     if (config.routes) {

@@ -1,0 +1,80 @@
+definition:
+  user_post:
+    type: "object"
+    required:
+      - email
+      - password
+      - firstname
+      - lastname
+    properties:
+      firstname: &firstname
+        type: string
+        example: John
+      lastname: &lastname
+        type: string
+        example: Smith
+      email: &email
+        type: string
+        example: john.smith@example.com
+      password: &password
+        type: string
+        format: password
+        example: Password1
+  user:
+    type: object
+    additionalProperties: false
+    required:
+      - id
+      - firstname
+      - lastname
+      - email
+    properties: &user-props
+      id: &id
+        type: integer
+        format: int32
+        example: 42
+      firstname:
+        <<: *firstname
+      lastname:
+        <<: *lastname
+      email:
+        <<: *email
+  user_patch:
+    type: "object"
+    properties:
+      firstname:
+        <<: *firstname
+      lastname:
+        <<: *lastname
+      password:
+        <<: *password
+      current_password:
+        <<: *password
+  user_invitation:
+    type: "object"
+    required:
+      - email
+      - firstname
+      - lastname
+    properties:
+      firstname:
+        <<: *firstname
+      lastname:
+        <<: *lastname
+      email:
+        <<: *email
+  user_me:
+    type: object
+    additionalProperties: false
+    required:
+      - id
+      - firstname
+      - lastname
+      - email
+      - accounts
+    properties:
+      <<: *user-props
+      accounts:
+        type: array
+        items:
+          $ref: "#/definitions/account"

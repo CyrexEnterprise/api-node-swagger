@@ -1,0 +1,150 @@
+/users:
+  post:
+    tags:
+      - users
+    summary: "Registration"
+    operationId: postUser
+    parameters:
+      -
+        in: "body"
+        name: "body"
+        description: "Create user"
+        required: true
+        schema:
+          $ref: "#/definitions/user_post"
+    responses:
+      201:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/definitions/user"
+      400:
+        $ref: "#/responses/badRequest"
+      default:
+        $ref: "#/responses/unexpected"
+  get:
+    tags:
+      - users
+    summary: "Find users"
+    description: "Returns all the users"
+    operationId: getUsers
+    security:
+      - api_key: []
+      - oauth2:
+        - users
+    responses:
+      200:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/definitions/user"
+      default:
+        $ref: "#/responses/unexpected"
+/users/{id}:
+  get:
+    tags:
+      - users
+    summary: "Find user"
+    description: "Returns a single user"
+    operationId: getUser
+    security:
+      - api_key: []
+      - oauth2:
+        - users
+    parameters:
+      -
+        $ref: "#/parameters/id"
+    responses:
+      200:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/definitions/user"
+      404:
+        $ref: "#/responses/notFound"
+      default:
+        $ref: "#/responses/unexpected"
+
+/users/{user_id}/accounts:
+  post:
+    tags:
+      - users
+    summary: "Create an account and/or associate it with user"
+    operationId: postUserAccount
+    security:
+      - api_key: []
+      - oauth2:
+        - users
+    description: >
+                   Account creation and association with user
+                   It will reject with bad request if account already exists,
+                   uniquely identified by name.
+                   If sucessful the user will be associated with the
+                   professional role.
+    parameters:
+      -
+        $ref: "#/parameters/user_id"
+      -
+        in: "body"
+        name: "body"
+        description: "Create account"
+        required: true
+        schema:
+          $ref: "#/definitions/account_post"
+    responses:
+      201:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: "#/definitions/account"
+      400:
+        $ref: "#/responses/badRequest"
+      default:
+        $ref: "#/responses/unexpected"
+  get:
+    tags:
+      - users
+    summary: "Find accounts associated with the user"
+    description: "Returns all the user associated accounts"
+    operationId: getUserAccounts
+    security:
+      - api_key: []
+      - oauth2:
+        - users
+    parameters:
+      -
+        $ref: "#/parameters/user_id"
+    responses:
+      200:
+        description: "Successful"
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/definitions/account"
+      404:
+        $ref: "#/responses/notFound"
+      default:
+        $ref: "#/responses/unexpected"
