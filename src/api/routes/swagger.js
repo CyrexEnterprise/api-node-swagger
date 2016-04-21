@@ -1,6 +1,6 @@
 'use strict';
 
-const debug = require('debug')('api:swagger');
+const debug = require('debug')('app:api:swagger');
 const _ = require('lodash');
 const errors = require('../../errors');
 

@@ -1,5 +1,5 @@
 'use strict';
-const debug = require('debug')('api:errors');
+const debug = require('debug')('app:errors');
 const errors = {};
 
 errors.badRequest = msg => {
