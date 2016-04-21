@@ -1,11 +1,11 @@
 {
   "apps" : [{
-    "name"        : "app",
+    "name"        : "api",
     "script"      : "bin/start.js",
     "merge_logs"  : true,
-    "error_file" : "./app-err.log",
-    "out_file"   : "./app-out.log",
-    "pid_file"   : "./app.pid",
+    "error_file" : "./api-err.log",
+    "out_file"   : "./api-out.log",
+    "pid_file"   : "./api.pid",
     "env": {
       "NODE_ENV": "development"
     },

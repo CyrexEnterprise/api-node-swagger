@@ -32,8 +32,7 @@ specific routers
 npm install [--production]
 ```
 
-#### Install [PM2](https://github.com/Unitech/pm2) globally to manage your
-node cluster
+#### Install [PM2](https://github.com/Unitech/pm2) globally to manage your node cluster
 
 ```
 sudo npm install -g pm2
@@ -65,7 +64,7 @@ NODE_ENV=<production|development> npm run start -s
 For continuous integration with no downtime
 
 ```
-pm2 gracefulReload app
+pm2 gracefulReload api
 ```
 
 #### Debug mode
