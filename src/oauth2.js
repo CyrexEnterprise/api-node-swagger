@@ -117,7 +117,7 @@ router.route('/login')
     extended: true
   }))
   .post(checkCredentials,
-    (req, res) => caller(buildPayload(req, queryParams, '/login', 'login'))
+    (req, res) => caller.call(buildPayload(req, queryParams, '/login', 'login'))
     .then(response => handler(res, 'login', response))
   );
 
@@ -130,7 +130,7 @@ router.route('/forgot')
     extended: true
   }))
   .post(checkMail,
-    (req, res) => caller(buildPayload(req, queryParams, '/forgot', 'forgot'))
+    (req, res) => caller.call(buildPayload(req, queryParams, '/forgot', 'forgot'))
     .then(response => handler(res, 'forgot', response))
   );
 
@@ -143,7 +143,7 @@ router.route('/resetpassword')
     extended: true
   }))
   .post(checkPassword,
-    (req, res) => caller(buildPayload(req, resetParams, '/resetpassword',
+    (req, res) => caller.call(buildPayload(req, resetParams, '/resetpassword',
       'resetpassword'))
     .then(response => handler(res, 'resetpassword', response))
   );
@@ -152,14 +152,14 @@ router.route('/resetpassword')
 router.route('/invitation')
   .all(checkMissingQuery.bind(null, invitationParams))
   .get((req, res) =>
-    caller(buildPayload(req, invitationParams, '/invitation',
+    caller.call(buildPayload(req, invitationParams, '/invitation',
       'getInvitation'))
     .then(response => handler(res, 'signup', response))
   )
   .post(bodyParser.urlencoded({
     extended: true
   }))
-  .post((req, res) => caller(buildPayload(req, invitationParams, '/invitation',
+  .post((req, res) => caller.call(buildPayload(req, invitationParams, '/invitation',
       'postInvitation'))
     .then(response => handler(res, 'signup', response))
   );
