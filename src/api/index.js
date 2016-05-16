@@ -38,8 +38,6 @@ const loadDocsDirs = (docsDirs, extensions) => {
   return _.flatten(dirs);
 };
 
-// TODO: enum error codes in specification
-
 module.exports = (app, namespace) => {
   let api = app;
   let route = app;
@@ -82,7 +80,7 @@ module.exports = (app, namespace) => {
         route.use(logger.middleware());
       }
 
-      if (config.logger.erroHandler) {
+      if (config.logger.errorHandler) {
         debug('logger middlewareError mount deferred');
         server.deferMount(logger.middlewareError(),
           namespace ? route : undefined);

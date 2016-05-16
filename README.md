@@ -15,7 +15,7 @@ Includes the Superadmin API aliased routing inside the main API allowing endpoin
 * [Launching the application](#launching-the-application)
     - [Cluster mode](#cluster-mode)
     - [Single node](#single-node)
-    - [Gracefull reload](#gracefull-reload)
+    - [Graceful reload](#graceful-reload)
     - [Debug mode](#debug-mode)
 * [Usage](#usage)
     - [How to add a new endpoint](#how-to-add-a-new-endpoint)
@@ -101,7 +101,7 @@ pm2 start ecosystem.json -env <development|production>
 NODE_ENV=<production|development> npm run start -s
 ```
 
-#### Gracefull reload
+#### Graceful reload
 
 For continuous integration with no downtime
 
@@ -185,13 +185,120 @@ however this router is mounted on the oauth2 api and not the base api.
 
 #### How to use the api builder
 
+To namespace different apis on the same application you may use the api builder (`./src/api/index.js`)
+module that for a given configuration setups the router, logger and swagger tooling.
+If no application is provided it will generate its own express application, useful
+for testing only a specific api.
+
+```javascript
+// express application
+const app = require('./src/express-server')();
+const apiBuilder = require('./src/api');
+// api built on top of app (app.api === api)
+const api = apiBuilder(app, 'api');
+
+// configuration that loads all the routes defined, and the swagger documentation
+// and validates it. Also initializes the logger middleware if configured to do so.
+api.config({
+    ...
+}).then(() => {
+    ...
+    // object containing all loaded routers
+    // (eg: api.routes.swagger === require('./src/api/routes/swagger'); )
+    console.log(api.routes);
+
+    // you should setup your custom routes here
+    api.routes.yourCustomRoute.setup({
+        ...
+    })
+
+    // utility method to mount all the routers associated (by the configuration) with this api
+    api.pipe();
+})
+```
+
+Check the API reference (or inline comments) for detailed interfaces.
+
 #### API Dispatch
 
 Remote Procedural Call to Business Logic Module through the Message Queue
 
+The dispatch is done with the caller provided by the [mq-node-amqp](https://github.com/Cloudoki/mq-node-amqp)
+module.
+
+```javascript
+const amqp = require('mq-node-amqp');
+amqp.createCaller({ ... })
+.then(caller => caller.call(payload))
+.then(response => console.log(response));
+```
+
+The routers are injected with the caller and, after building the paylaod from the
+received HTTP request, dispatch the payload to the BLM and await an response
+which will used to reply to the request.
+
 ##### How to build a custom message payload
 
+If your build the api serving the router with swagger documentation the request
+object will have available an object descriptive of the endpoint called `req.swagger`
+that you can use to assist you in building the payload. This object will only be
+available if the endpoint was match with the documentation and parsed correctly.
+
+```javascript
+const payload = {
+  // (required) method of the operation
+  method: req.method,
+  // authorization token
+  token: req.token,
+  // (required) apiPath corresponds to the endpoint path
+  apiPath: swagger.apiPath, // (eg: '/users/{id}')
+  // basePath corresponds to the api mount path (eg: '/0')
+  basePath: swagger.swaggerObject.basepath,
+  // (required) operationId (eg. 'getUser')
+  operationId: swagger.operation.operationId,
+  // array of names of security definitions associated with the operation
+  // (eg: ['oauth2'])
+  security: swagger.security,
+  // parameters other than body parsed
+  params: _.mapValues(
+    _.pick(swagger.params, (value, key) => key !== 'body' ),
+    o => o.value)
+});
+
+// only build the payload body with properties described on the documentation
+if (req.swagger.params.body) {
+  payload.body = _.pick(req.body,
+    Object.keys(req.swagger.params.body.schema.schema.properties)
+  );
+}
+```
+
+You may build your own without using swagger as long it builds the required
+fields. Also you may not use some properties that will be overwritten by the caller:
+`id`, `ts`.
+
 ##### How to build a custom response handler
+
+A proper response from the BLM even in case of error will have at least the
+following properties:
+
+ - id {string}: matches the payload id (required)
+ - statusCode {integer}: HTTP response status code (required)
+ - body {object}: response body data (required except for 204 status)
+
+In order to build a handler for responses from the caller you will need to handle
+bad BLM responses (just in case) may use the process error already defined in
+`./src/api/errors.js`.
+
+You may use for reference the swagger handler (`./src/api/routes/swagger.js`) which
+additionally also sets responses headers if provided in the response.
+
+ - headers {object}: HTTP response headers
+
+Or even the oauth2 response handler (`./src/oauth2.js`) which will redirect
+HTTP requests if response has a redirect property.
+
+- redirect {string}: HTTP redirect url
 
 ## API Reference
 

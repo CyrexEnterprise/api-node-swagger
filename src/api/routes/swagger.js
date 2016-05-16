@@ -29,8 +29,6 @@ const parseSwagger = swagger => ({
     o => o.value)
 });
 
-// TODO: when message sent to MQ version it!
-
 router.all('/', (req, res, next) => {
   if (!req.swagger || !req.swagger.path[req.method.toLowerCase()]) {
     debug('ignore');

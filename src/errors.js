@@ -23,6 +23,13 @@ errors.unauthorized = () => {
   return err;
 };
 
+errors.process = msg => {
+  const error = new Error('Processing Error: ' + msg);
+  error.code = 'BAD_BLM_RESPONSE';
+  error.status = 500;
+  return error;
+};
+
 /* eslint-disable no-unused-vars */
 errors.handler = logger => (err, req, res, next) => {
   /* eslint-enable no-unused-vars */
