@@ -22,7 +22,7 @@ Includes the Superadmin API aliased routing inside the main API allowing endpoin
     - [How to add a new view](#how-to-add-a-new-view)
     - [How to build a custom router](#how-to-build-a-custom-router)
     - [How to use the api builder](#how-to-use-the-api-builder)
-    - [API Dispatch](#api-dispatch)
+    - [Dispatch](#dispatch)
       * [How to build a custom message payload](#how-to-build-a-custom-message-payload)
       * [How to build a custom response handler](#how-to-build-a-custom-response-handler)
     - [Logging](#logging)
@@ -221,7 +221,7 @@ api.config({
 
 Check the API reference (or inline comments) for detailed interfaces.
 
-#### API Dispatch
+#### Dispatch
 
 Remote Procedural Call to Business Logic Module through the Message Queue
 
