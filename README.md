@@ -25,6 +25,8 @@ Includes the Superadmin API aliased routing inside the main API allowing endpoin
     - [API Dispatch](#api-dispatch)
       * [How to build a custom message payload](#how-to-build-a-custom-message-payload)
       * [How to build a custom response handler](#how-to-build-a-custom-response-handler)
+    - [Logging](#logging)
+    - [Debugging](#debugging)
 * [API Reference](#api-reference)
 * [Testing and Coverage](#testing-and-coverage)
 * [Check linting](#check-linting)
