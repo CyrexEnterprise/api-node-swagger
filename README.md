@@ -302,6 +302,42 @@ HTTP requests if response has a redirect property.
 
 - redirect {string}: HTTP redirect url
 
+#### Error handling
+
+All errors on the express routes if not handled are propagated to the
+application error handler defined at `./src/api/errors.js` or if the a route
+is not found it will generate the not found response. This handler is mounted
+on the application in the init script `./bin/start.js`.
+
+It will generate an json response with the following format:
+```javascript
+{
+  errors: [{
+      code: 'NOT_FOUND',
+      message: 'Not Found'
+  }]
+}
+```
+
+If you want to propagate an error make sure it is created with code property so
+that it will not throw an unexpected error instead.
+
+```javascript
+// error in a route handler
+  if (conditionNotMet) {
+    const err = new Error('your message');
+    err.code = 'YOUR_CODE';
+    throw err;
+  }
+```
+
+For swagger documented routes it will generated proper request validation errors array
+with if applicable multiple errors. It may also generate response validation errors,
+that is when the response from the router does not match the defined response model
+on the documentation (enable response validation on development mode).
+It generates for swagger documented routes the 406 Not Acceptable HTTP request on
+invalid Accept headers.
+
 #### Logging
 
 For logging you may use the provided log builder `./src/log.js` it uses the
