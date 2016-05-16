@@ -300,6 +300,33 @@ HTTP requests if response has a redirect property.
 
 - redirect {string}: HTTP redirect url
 
+#### Logging
+
+For logging you may use the provided log builder `./src/log.js` it uses the
+[winston](https://github.com/winstonjs/winston) module that provides asynchronous
+ logging and multiple transports. The builder provides an easy way to setup
+ multiple transports from a single configuration. You will want to keep them
+ to two arguments: message and data object. Avoid doing computation intensive
+ actions to generate this data object.
+
+ ```javascript
+logger.info('your message here', {
+  time: new Date().toISOString()
+  something: yourvariable
+})
+```
+
+If you want to wait on logging callback you can use the promise api:
+
+```javascript
+logger.promise.info('log this please').then(() => doSomethingAfterLogging())
+```
+
+The [api builder](#how-to-use-the-api-builder) uses the created logger middleware
+`logger.middleware` which if enabled in the configuration will log incoming requests and
+the corresponding responses if is built using the [express-winston](https://github.com/bithavoc/express-winston)
+module.
+
 ## API Reference
 
 - [jsDoc](http://usejsdoc.org/)
