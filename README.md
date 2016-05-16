@@ -2,8 +2,10 @@
 
 Boilerplate for API Layer - Node.JS - Swagger
 
-The API layer services the Business Logic Module ([blm-node-sequelize](https://github.com/Cloudoki/blm-node-sequelize)) through the Message Queue layer ([mq-node-amqp](https://github.com/Cloudoki/mq-node-amqp)),
-in a scalable and balanced matter. It is built on top of [Swagger-Tools](https://github.com/apigee-127/swagger-tools) ([openAPI](https://openapis.org/)) and [express](http://expressjs.com/)
+The API layer services the Business Logic Module
+([blm-node-sequelize](https://github.com/Cloudoki/blm-node-sequelize))
+through the Message Queue layer ([mq-node-amqp](https://github.com/Cloudoki/mq-node-amqp)),
+in a scalable and balanced matter. It is built on top of [swagger-tools](https://github.com/apigee-127/swagger-tools) ([openAPI](https://openapis.org/)) and [express](http://expressjs.com/)
 to provide an design driven API construction. It includes already implemented the
 a OAuth2 Module implicit flow for client-side authentication.
 Includes the Superadmin API aliased routing inside the main API allowing endpoint reuse.
@@ -11,13 +13,21 @@ Includes the Superadmin API aliased routing inside the main API allowing endpoin
 * [Features](#features)
 * [How to Install](#how-to-install)
 * [Launching the application](#launching-the-application)
-  - [Cluster mode](#cluster-mode)
-  - [Single node](#single-node)
-  - [Gracefull reload](#gracefull-reload)
-  - [Debug mode](#debug-mode)
+    - [Cluster mode](#cluster-mode)
+    - [Single node](#single-node)
+    - [Gracefull reload](#gracefull-reload)
+    - [Debug mode](#debug-mode)
+* [Usage](#usage)
+    - [How to add a new endpoint](#how-to-add-a-new-endpoint)
+    - [How to add a new view](#how-to-add-a-new-view)
+    - [How to build a custom router](#how-to-build-a-custom-router)
+    - [How to use the api builder](#how-to-use-the-api-builder)
+    - [API Dispatch](#api-dispatch)
+      * [How to build a custom message payload](#how-to-build-a-custom-message-payload)
+      * [How to build a custom response handler](#how-to-build-a-custom-response-handler)
+* [API Reference](#api-reference)
 * [Testing and Coverage](#testing-and-coverage)
 * [Check linting](#check-linting)
-* [API Reference](#api-reference)
 * [Roadmap](#roadmap)
 
 ## Features
@@ -105,25 +115,84 @@ pm2 gracefulReload api
 npm run debug -s
 ```
 
-## Testing and Coverage
+## Usage
 
- - [mocha](https://mochajs.org/)
- - [istanbul](https://github.com/gotwarlost/istanbul)
+#### How to add a new endpoint
 
+To add an endpoint to the API you will need to start by providing the endpoint
+ documentation following the [openAPI specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md).
+Create a new yaml file at `./src/api/routes` with the endpoint documentation.
+You may use one of the already defined models at `./src/api/definitions`,
+responses `./src/api/responses.yaml`, parameters `./src/api/parameters.yaml`.
+
+And that's it: your documentation will automatically be picked up by the
+([swagger-jsdoc](https://github.com/Surnet/swagger-jsdoc)) module,
+this will produce an object and output it to `./api-docs.json` which will be
+validated, if it fails this you may import the output json on the
+[http://editor.swagger.io/](http://editor.swagger.io/) for more advanced error
+descriptions and warnings.
+
+This process of loading documentation, building the express router and mounting
+swagger validation and so on is done at `./src/api/index.js`
+
+#### How to add a new view
+
+You might want this layer to provide other views besides the ones already provided
+for the OAuth2 implicit flow. For this you will need lookup the
+[express-handlebars](https://github.com/ericf/express-handlebars) documentation
+this module is used to generate the views for the application.
+Also look into express documentation on [using template engines](http://expressjs.com/en/guide/using-template-engines.html).
+
+This configuration and setup is done on the init script (`./bin/start.js`)
+
+#### How to build a custom router
+
+You may instead of using the already builtin router that uses the swagger
+documentation provided you may want to build your own for more advanced use.
+
+- Build an [express router](http://expressjs.com/en/guide/routing.html)
+- Add the endpoint property: a string that will be given to `app.use(router.endpoint, router)`
+- If setup is needed implement a setup method that takes in an object built
+with the configuration file and mixed in dependencies (logging, caller, ...)
+
+```javascript
+express.Router {
+  endpoint: '/test',
+  setup: function(configuration) {
+    // your setup here
+  }
+}
 ```
-npm run test -s
+
+- If you need your router to dispatch messages to the Business Logic Module
+you will need to build the message payload (see:
+  [how to build a custom message payload](#how-to-build-a-custom-message-payload))
+  and handle the response (see: [how to build a custom response handler](#how-to-build-a-custom-response-handler)).
+
+- You will then need to alter the init script (`./bin/start.js`) to if the router
+requires setup:
+
+```javascript
+// example that provides a logger and caller to the router through setup
+api.routes.yourCustomRouter.setup({
+  logger,
+  caller
+});
 ```
 
-Coverage reports will be generated at `./coverage`
+An example of a custom router is the router for the OAuth2 endpoints (`./src/oauth2.js`),
+however this router is mounted on the oauth2 api and not the base api.
 
-## Check linting
+#### How to use the api builder
 
-- [eslint](http://eslint.org/)
+#### API Dispatch
 
-```
-npm run lint -s
+Remote Procedural Call to Business Logic Module through the Message Queue
 
-```
+##### How to build a custom message payload
+
+##### How to build a custom response handler
+
 ## API Reference
 
 - [jsDoc](http://usejsdoc.org/)
@@ -143,7 +212,25 @@ npm install -g http-server
 http-server
 ```
 
+## Testing and Coverage
+
+ - [mocha](https://mochajs.org/)
+ - [istanbul](https://github.com/gotwarlost/istanbul)
+
+```
+npm run test -s
+```
+
+Coverage reports will be generated at `./coverage`
+
+## Check linting
+
+- [eslint](http://eslint.org/)
+
+```
+npm run lint -s
+```
+
 ## Roadmap
 
 - Auto generated endpoint tests from swagger documentation
-- Auto mocking of endpoints from swagger documentation

@@ -45,22 +45,27 @@ debug('environment', _.pick(process.env,
   'PORT'
 ));
 
+// setup Cross-Origin Resource Sharing and trustProxy
+
 if (config.get('server.cors')) {
   app.use(cors(_.cloneDeep(config.server.cors)));
 }
-
-const hbs = exphbs.create(config.get('server.views'));
-
-app.engine(config.get('server.views.extname'), hbs.engine);
-// set default engine
-app.set('view engine', config.get('server.views.extname'));
-
 if (config.has('server.trustProxy')) {
   app.set('trust proxy', config.get('server.trustProxy'));
 }
+
+
+// Setup application template engine
+
+const hbs = exphbs.create(config.get('server.views'));
+app.engine(config.get('server.views.extname'), hbs.engine);
+// set default engine
+app.set('view engine', config.get('server.views.extname'));
 app.set('views', path.resolve(process.cwd(),
   config.get('server.views.path')));
 
+
+// Application initialization
 
 api.config(config.get('api')).then(resolved => {
   debug('config api');
