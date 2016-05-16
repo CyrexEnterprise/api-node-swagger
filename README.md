@@ -327,6 +327,21 @@ The [api builder](#how-to-use-the-api-builder) uses the created logger middlewar
 the corresponding responses if is built using the [express-winston](https://github.com/bithavoc/express-winston)
 module.
 
+
+#### Debugging
+
+For debugging your application you should use the [debug](https://github.com/visionmedia/debug)
+module which namepscaes different of your code and diffs the time between debug sections
+it will only be active for namespaces provided in the DEBUG environment variable.
+
+`DEBUG=app:*` is the one used for npm debug script (`npm run debug`).
+
+But you may want to debug specific sections (eg: `DEBUG:oauth,app:api:*`)
+
+As long as your are not doing a compute intensive task to produce the object to debug
+you may leave the debug statment there since it will be converted to noop function
+(`() => ()`) if not in debugging mode and shouldn't affect performance.
+
 ## API Reference
 
 - [jsDoc](http://usejsdoc.org/)
