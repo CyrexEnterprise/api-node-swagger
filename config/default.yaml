@@ -141,6 +141,7 @@ api: &api
     - './src/api/routes'
   swagger:
     <<: *swagger
+    outputSpec: ./api-docs.json
     swagger-ui:
       <<: *swagger-ui
     swaggerDefinition:
@@ -167,6 +168,7 @@ superadmin:
     - ./src/api/routes/swagger
   swagger:
     <<: *swagger
+    outputSpec: ./sa-api-docs.json
     ui:
       swaggerUi: /superadmin-docs
       apiDocs: /superadmin-api-docs

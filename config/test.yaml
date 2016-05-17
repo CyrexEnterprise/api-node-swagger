@@ -7,3 +7,7 @@ api:
   swagger:
     swaggerDefinition:
       basePath: /
+
+caller:
+  queue:
+    name: rpc_test

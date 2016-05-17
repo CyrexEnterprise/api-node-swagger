@@ -56,7 +56,7 @@ Includes the Superadmin API aliased routing inside the main API allowing endpoin
 - Explicit and customizable **error handling** with normalized json output
 - **Clustered** mode, graceful shutdown or reload with [PM2](https://github.com/Unitech/pm2)
 - Integration and unit tests (with [mocha](https://mochajs.org/) and [supertest](https://github.com/visionmedia/supertest))
-- Test code coverage ([istanbul](https://github.com/gotwarlost/istanbul) and generated report
+- Test code coverage ([istanbul](https://github.com/gotwarlost/istanbul) and generated report)
 - Asynchronous logging with multi transport support ([winston](https://github.com/winstonjs/winston)) and promised logging
 - Debug synchronously with diff timing ([debug](https://github.com/visionmedia/debug))
 - [bluebird](https://github.com/petkaantonov/bluebird) promises
@@ -67,6 +67,10 @@ Requirements:
 
 - node: >5.10
 - npm: >3.3
+- RabbitMQ: >3.6.1 (or equivalent AMQP broker)
+
+You will need the Message Queue Layer setup before you attempt to start the api as
+it will try connect to it and abort (see: [mq-node-amqp](https://github.com/Cloudoki/mq-node-amqp)).
 
 Install dependencies:
 
@@ -85,8 +89,8 @@ sudo npm install -g pm2
 Create your local configuration file:
 
 You will need to add a local configuration file: `./config/local.yaml` that
-will overwrite the configuration, check
-[node-config](https://github.com/lorenwest/node-config) for details on how the configuration is setup.
+will overwrite the configuration, check the [configuration](#configuration) section
+ for details on how the configuration is setup.
 
 ## Launching the application
 
@@ -118,6 +122,22 @@ npm run debug -s
 ```
 
 ## Usage
+
+#### Swagger-UI
+
+On development enviroment the api will serve an utility page Swagger-UI with the
+swagger documented endpoints and allow you to generate requests. After sucessfully
+starting the api you may on your browser the following links:
+
+```
+API Swagger-UI
+http://localhost:8000/0/docs
+```
+
+```
+Superadmin Swagger-UI specific endpoints
+http://localhost:8000/0/superadmin-docs
+```
 
 #### How to add a new endpoint
 
@@ -343,6 +363,47 @@ that is when the response from the router does not match the defined response mo
 on the documentation (enable response validation on development mode).
 It generates for swagger documented routes the 406 Not Acceptable HTTP request on
 invalid Accept headers.
+
+#### Configuration
+
+For configuration the [config](https://github.com/lorenwest/node-config) module
+that allows for configuration on specific enviroments:
+
+ - `./config/development.yaml` for `NODE_ENV=development` or if `NODE_ENV` is not set
+ - `./config/production.yaml` for `NODE_ENV=production`
+ - `./config/test.yaml` for `NODE_ENV=test`
+
+If needed you can create a local configuration: create an `local.yaml` file
+that replaces the default configuration on sensitive or server specific configuration.
+
+Your deployed `local.yaml` file should at least have the following configurations:
+
+```yaml
+oauth2:
+  authorizationUrl: http://api.domain.com/oauth2/login
+
+api:
+  swagger:
+    swagger-ui:
+      # this might not be needed if the swagger-ui page properly setups the url
+      # prefixed with /0
+      swaggerUiPrefix: '/0'
+    swaggerDefinition:
+      host: api.domain.com
+    oauth2:
+      authorizationUrl: http://api.domain.com/oauth2/login
+
+superadmin:
+  swagger:
+    swagger-ui:
+      swaggerUiPrefix: '/0'
+    swaggerDefinition:
+      host: api.domain.com
+    oauth2:
+      authorizationUrl: http://api.domain.com/oauth2/login
+```
+
+Note that you should use secure HTTP and change the corresponding configurations.
 
 #### Logging
 

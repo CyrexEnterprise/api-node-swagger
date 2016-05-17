@@ -12,7 +12,6 @@ api:
     transports:
       Console: false
   swagger:
-    outputSpec: ./api-docs.json
     ui: false
     serveDocs: /api-docs
 
@@ -20,6 +19,5 @@ superadmin:
   logger:
     middleware: false
   swagger:
-    outputSpec: ./sa-api-docs.json
     ui: false
     serveDocs: false

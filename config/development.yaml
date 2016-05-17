@@ -1,11 +1,9 @@
 api:
   swagger:
-    outputSpec: ./api-docs.json
     validator:
       validateResponse: true
 
 superadmin:
   swagger:
-    outputSpec: ./sa-api-docs.json
     validator:
       validateResponse: true
