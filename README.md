@@ -124,6 +124,75 @@ pm2 gracefulReload api
 npm run debug -s
 ```
 
+## Configuration
+
+For configuration the [config](https://github.com/lorenwest/node-config) module
+that allows for configuration on specific enviroments:
+
+ - `./config/development.yaml` for `NODE_ENV=development` or if `NODE_ENV` is not set
+ - `./config/production.yaml` for `NODE_ENV=production`
+ - `./config/test.yaml` for `NODE_ENV=test`
+
+You will eventually need to create an `local.yaml` file
+that replaces the default configuration on sensitive or server specific configuration
+that is not pushed to version control (eg. github).
+
+Your deployed `local.yaml` file should at least have the following configurations:
+
+```yaml
+oauth2:
+  authorizationUrl: http://api.domain.com/oauth2/login
+
+api:
+  swagger:
+    swagger-ui:
+      # this might not be needed if the swagger-ui page properly setups the url
+      # prefixed with /0
+      swaggerUiPrefix: '/0'
+    swaggerDefinition:
+      host: api.domain.com
+    oauth2:
+      authorizationUrl: http://api.domain.com/oauth2/login
+
+superadmin:
+  swagger:
+    swagger-ui:
+      swaggerUiPrefix: '/0'
+    swaggerDefinition:
+      host: api.domain.com
+    oauth2:
+      authorizationUrl: http://api.domain.com/oauth2/login
+```
+
+**Note:** you should use secure HTTP and change the corresponding configurations.
+
+```yaml
+# replace all instances of authorizationUrl with https instead of http
+
+authorizationUrl: https://api.domain.com/oauth2/login
+
+# also replace on all apis with swagger setup the schemes definition to https
+
+#api/superadmin:
+  swagger:
+    schemes:
+      - https
+```
+
+If you are not using [NGINX](http://nginx.org/en/) or other similar service as
+reverse proxy and translating the HTTPS to HTTP (recommended) and instead you
+are using this API directly to serve the requests, then you will also need to change the
+server configuration to be able to deal with the HTTPS requests:
+
+```yaml
+server:
+  # you will probably also need to change the port
+  # port: 443
+  secure:
+    key: /path/to/key.pem
+    cert: /path/to/certificate.pem
+```
+
 ## Usage
 
 #### Swagger-UI
@@ -359,47 +428,6 @@ that is when the response from the router does not match the defined response mo
 on the documentation (enable response validation on development mode).
 It generates for swagger documented routes the 406 Not Acceptable HTTP request on
 invalid Accept headers.
-
-#### Configuration
-
-For configuration the [config](https://github.com/lorenwest/node-config) module
-that allows for configuration on specific enviroments:
-
- - `./config/development.yaml` for `NODE_ENV=development` or if `NODE_ENV` is not set
- - `./config/production.yaml` for `NODE_ENV=production`
- - `./config/test.yaml` for `NODE_ENV=test`
-
-If needed you can create a local configuration: create an `local.yaml` file
-that replaces the default configuration on sensitive or server specific configuration.
-
-Your deployed `local.yaml` file should at least have the following configurations:
-
-```yaml
-oauth2:
-  authorizationUrl: http://api.domain.com/oauth2/login
-
-api:
-  swagger:
-    swagger-ui:
-      # this might not be needed if the swagger-ui page properly setups the url
-      # prefixed with /0
-      swaggerUiPrefix: '/0'
-    swaggerDefinition:
-      host: api.domain.com
-    oauth2:
-      authorizationUrl: http://api.domain.com/oauth2/login
-
-superadmin:
-  swagger:
-    swagger-ui:
-      swaggerUiPrefix: '/0'
-    swaggerDefinition:
-      host: api.domain.com
-    oauth2:
-      authorizationUrl: http://api.domain.com/oauth2/login
-```
-
-Note that you should use secure HTTP and change the corresponding configurations.
 
 #### Logging
 
