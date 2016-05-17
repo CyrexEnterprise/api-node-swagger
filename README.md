@@ -230,7 +230,7 @@ module.
 
 ```javascript
 const amqp = require('mq-node-amqp');
-amqp.createCaller(
+amqp.createCaller({
   connection: {
     url: 'amqp://localhost'
   },
