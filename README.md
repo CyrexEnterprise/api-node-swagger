@@ -129,8 +129,8 @@ On development enviroment the api will serve an utility page Swagger-UI with the
 swagger documented endpoints and allow you to generate requests. After sucessfully
 starting the api you may on your browser open the following links:
 
- - API Swagger-UI: [http://localhost:8000/0/docs](http://localhost:8000/0/docs)
- - Superadmin Swagger-UI: [http://localhost:8000/0/superadmin-docs](http://localhost:8000/0/superadmin-docs)
+ - API: [http://localhost:8000/0/docs](http://localhost:8000/0/docs)
+ - Superadmin: [http://localhost:8000/0/superadmin-docs](http://localhost:8000/0/superadmin-docs)
 
 #### How to add a new endpoint
 
