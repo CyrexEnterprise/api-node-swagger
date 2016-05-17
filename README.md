@@ -230,12 +230,18 @@ module.
 
 ```javascript
 const amqp = require('mq-node-amqp');
-amqp.createCaller({ ... })
-.then(caller => caller.call(payload))
-.then(response => console.log(response));
+amqp.createCaller(
+  connection: {
+    url: 'amqp://localhost'
+  },
+  queue: {
+    name: 'rpc'
+  }
+}).then(caller => caller.call(payload))
+  .then(response => console.log(response));
 ```
 
-The routers are injected with the caller and, after building the paylaod from the
+The routers are injected with the caller and, after building the payload from the
 received HTTP request, dispatch the payload to the BLM and await an response
 which will used to reply to the request.
 
