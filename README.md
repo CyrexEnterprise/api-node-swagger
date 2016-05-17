@@ -72,7 +72,7 @@ Requirements:
 - npm: >3.3
 - RabbitMQ: >3.6.1 (or equivalent AMQP broker)
 
-You will need the Message Queue Layer setup before you attempt to start the api as
+You will need the Message Queue Layer setup before you attempt to start the API Layer as
 it will try connect to it and abort (see: [mq-node-amqp](https://github.com/Cloudoki/mq-node-amqp)).
 
 Install dependencies:
