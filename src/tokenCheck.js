@@ -1,5 +1,5 @@
 'use strict';
-const debug = require('debug')('app:token');
+const debug = require('debug')('tokencheck');
 const errors = require('./errors');
 
 module.exports = strict => (req, res, next) => {
