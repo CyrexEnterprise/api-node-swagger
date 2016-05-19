@@ -35,6 +35,8 @@ Includes the Superadmin API aliased routing inside the main API allowing endpoin
 * [Check linting](#check-linting)
 * [Roadmap](#roadmap)
 
+![3-Layer Architecture](http://i.imgur.com/6KbTryk.png)
+
 ## Features
 
 - Integrates with the **3-layered architecture**:
