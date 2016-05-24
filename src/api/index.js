@@ -28,7 +28,7 @@ const loadDocsDirs = (docsDirs, extensions) => {
     return [];
   }
   const exts = extensions || ['.js', '.jsdoc', '.yaml', '.yml'];
-  const dirs = docsDirs.map(resolvePath).map(fs.readdirSync)
+  const dirs = docsDirs.map(resolvePath).map(p => fs.readdirSync(p))
     .map((filenames, i) => filenames.map(path.parse)
       .filter(
         file => file.name &&
