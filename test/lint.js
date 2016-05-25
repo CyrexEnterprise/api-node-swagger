@@ -6,7 +6,8 @@ const lint = require('mocha-eslint');
 const paths = [
   'bin',
   'src',
-  'test'
+  'test',
+  'scripts'
 ];
 
 // Specify style of output
