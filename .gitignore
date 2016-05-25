@@ -31,3 +31,7 @@ config/local-*.*
 
 # ignore auto generated api-docs.json
 *api-docs.json
+
+test/swagger
+test/saSwagger
+test/.env

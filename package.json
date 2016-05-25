@@ -45,6 +45,6 @@
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
     "supertest": "^1.0.0",
-    "swagger-test-templates": "github:cloudoki/swagger-test-templates"
+    "swagger-test-templates": "apigee-127/swagger-test-templates"
   }
 }
