@@ -3,10 +3,19 @@ server:
 
 api:
   logger: false
-  ui: false
   swagger:
-    swaggerDefinition:
-      basePath: /
+    ui: false
+    serveDocs: false
+    validator:
+      validateResponse: true
+
+superadmin:
+  logger: false
+  swagger:
+    ui: false
+    serveDocs: false
+    validator:
+      validateResponse: true
 
 caller:
   queue:
