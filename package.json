@@ -27,7 +27,7 @@
     "express-winston": "^1.2.0",
     "lodash": "^3.10.1",
     "mq-node-amqp": "github:Cloudoki/mq-node-amqp",
-    "hyper-ui-donderstarter": "github:Cloudoki/hyper-ui-donderstarter"
+    "hyper-ui-donderstarter": "github:Cloudoki/hyper-ui-donderstarter",
     "swagger-jsdoc": "^1.3.0",
     "swagger-tools": "^0.9.11",
     "winston": "^2.1.1"
