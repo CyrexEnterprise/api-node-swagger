@@ -6,6 +6,8 @@ const _ = require('lodash');
 const bodyParser = require('body-parser');
 const errors = require('./errors');
 
+const path = require('path');
+
 const router = require('express').Router();
 
 router.endpoint = '/';
@@ -163,5 +165,9 @@ router.route('/invitation')
       'postInvitation'))
     .then(response => handler(res, 'signup', response))
   );
+
+router.get('/css/main.css', (req, res) =>
+  res.sendFile(path.resolve(process.cwd(),
+    './node_modules/hyper-ui-donderstarter/dist/css/main.css')));
 
 module.exports = router;
