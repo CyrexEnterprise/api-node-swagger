@@ -206,6 +206,7 @@ server:
       - Authorization
     methods:
       - GET
+      - HEAD
       - POST
       - PUT
       - PATCH

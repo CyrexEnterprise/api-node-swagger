@@ -104,6 +104,7 @@ will overwrite the configuration, check the [configuration](#configuration) sect
 
 ```
 pm2 start ecosystem.json -env <development|production>
+pm2 save
 ```
 
 #### Single node
