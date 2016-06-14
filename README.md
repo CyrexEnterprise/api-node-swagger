@@ -148,10 +148,6 @@ oauth2:
 
 api:
   swagger:
-    swagger-ui:
-      # this might not be needed if the swagger-ui page properly setups the url
-      # prefixed with /0
-      swaggerUiPrefix: '/0'
     swaggerDefinition:
       host: api.domain.com
     oauth2:
@@ -159,8 +155,6 @@ api:
 
 superadmin:
   swagger:
-    swagger-ui:
-      swaggerUiPrefix: '/0'
     swaggerDefinition:
       host: api.domain.com
     oauth2:
