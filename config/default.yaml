@@ -77,19 +77,6 @@ swagger: &swagger
     swaggerUi: /docs
     apiDocs: /api-docs
   swaggerDefinition: &swaggerDefinition
-    tags:
-      -
-        name: accounts
-        description: Operations about Accounts
-      -
-        name: users
-        description: Operations about Users
-      -
-        name: meta
-        description: Operations related to the API
-      -
-        name: interact
-        description: Interact with the API
     host: localhost:8000 # Host (optional)
     schemes:
       - http

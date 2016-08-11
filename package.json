@@ -28,7 +28,7 @@
     "lodash": "^3.10.1",
     "mq-node-amqp": "github:Cloudoki/mq-node-amqp",
     "hyper-ui-donderstarter": "github:Cloudoki/hyper-ui-donderstarter",
-    "swagger-jsdoc": "^1.3.0",
+    "swagger-jsdoc": "github:Cloudoki/swagger-jsdoc",
     "swagger-tools": "^0.9.11",
     "winston": "^2.1.1"
   },
